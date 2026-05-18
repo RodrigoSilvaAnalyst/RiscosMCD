@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>McDonald's (MCD) — Análise de Risco | Análise Fundamental</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --mcd-red:#DA291C;
+    --mcd-yellow:#FFC72C;
+    --mcd-dark:#0E0E12;
+    --mcd-panel:#16161D;
+    --mcd-panel-2:#1E1E27;
+    --mcd-border:#2A2A36;
+    --mcd-text:#EAEAF0;
+    --mcd-muted:#9A9AA8;
+    --mcd-green:#27C28A;
+    --mcd-blue:#3B82F6;
+    --mcd-orange:#FF8A00;
+    --mcd-purple:#A855F7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(ellipse at top,#1A1A24 0%,var(--mcd-dark) 60%);
+    color:var(--mcd-text);line-height:1.55;overflow-x:hidden;min-height:100vh;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:
+      radial-gradient(circle at 25% 25%,rgba(218,41,28,0.08),transparent 40%),
+      radial-gradient(circle at 75% 75%,rgba(255,138,0,0.08),transparent 40%);
+    pointer-events:none;z-index:0;
+    animation:bgDrift 20s ease-in-out infinite alternate;
+  }
+  @keyframes bgDrift{
+    0%{transform:translate(0,0) scale(1)}
+    100%{transform:translate(-3%,2%) scale(1.05)}
+  }
+  .container{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+  /* ANALYST BADGE */
+  .analyst-badges{
+    position:fixed;top:18px;right:18px;z-index:1000;
+    display:flex;align-items:center;gap:10px;
+  }
+  .analyst-badge{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(20,20,28,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--mcd-border);
+    padding:7px 14px 7px 7px;border-radius:999px;
+    text-decoration:none;color:var(--mcd-text);
+    transition:all 0.3s ease;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  }
+  .analyst-badge:hover{border-color:var(--mcd-yellow);transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,199,44,0.25)}
+  .analyst-avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--mcd-yellow),var(--mcd-red));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#0E0E12;font-size:0.82rem;letter-spacing:-0.02em;
+  }
+  .analyst-info{font-size:0.78rem;line-height:1.25}
+  .analyst-label{color:var(--mcd-muted);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:600}
+  .analyst-name{color:var(--mcd-text);font-weight:700;font-size:0.85rem}
+  .linkedin-icon{width:16px;height:16px;color:var(--mcd-yellow);margin-left:2px;flex-shrink:0}
+  @media(max-width:600px){
+    .analyst-badges{top:12px;right:12px;gap:8px}
+    .analyst-badge{padding:6px 10px 6px 6px}
+    .analyst-info{display:none}
+  }
+
+  /* HERO */
+  .hero{
+    min-height:88vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:80px 24px 60px;position:relative;
+  }
+  .risk-icon-wrap{
+    position:relative;width:180px;height:180px;margin-bottom:24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .risk-icon-wrap::before{
+    content:'';position:absolute;inset:-10px;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--mcd-green),var(--mcd-yellow),var(--mcd-orange),var(--mcd-red),var(--mcd-green));
+    filter:blur(20px);opacity:0.4;
+    animation:spin 12s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .warning-svg{
+    width:120px;height:120px;position:relative;z-index:1;
+    filter:drop-shadow(0 0 30px rgba(255,138,0,0.5));
+    animation:wiggle 3s ease-in-out infinite;
+  }
+  @keyframes wiggle{
+    0%,100%{transform:rotate(0)}
+    25%{transform:rotate(-3deg)}
+    75%{transform:rotate(3deg)}
+  }
+  .hero h1{
+    font-size:clamp(2rem,5vw,4.2rem);
+    font-weight:900;letter-spacing:-0.02em;
+    background:linear-gradient(135deg,var(--mcd-yellow) 0%,var(--mcd-orange) 50%,var(--mcd-red) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    margin-bottom:16px;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp 0.9s ease-out 0.2s forwards;
+  }
+  .hero .ticker{
+    display:inline-flex;gap:14px;align-items:center;
+    background:rgba(255,138,0,0.1);border:1px solid rgba(255,138,0,0.3);
+    padding:8px 20px;border-radius:999px;
+    font-weight:600;color:var(--mcd-orange);
+    margin-bottom:24px;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp 0.9s ease-out 0.4s forwards;
+  }
+  .hero .subtitle{
+    color:var(--mcd-muted);max-width:780px;font-size:1.1rem;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp 0.9s ease-out 0.6s forwards;
+  }
+  .hero-badge{
+    display:inline-block;padding:4px 12px;border-radius:6px;
+    background:var(--mcd-red);color:white;font-size:0.75rem;font-weight:700;
+    letter-spacing:0.1em;text-transform:uppercase;margin-bottom:18px;
+    opacity:0;animation:fadeUp 0.9s ease-out forwards;
+  }
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+  .scroll-indicator{
+    position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+    color:var(--mcd-muted);font-size:0.85rem;
+    animation:bounce 2s infinite;
+  }
+  @keyframes bounce{
+    0%,100%{transform:translate(-50%,0)}
+    50%{transform:translate(-50%,8px)}
+  }
+
+  section{padding:80px 0;position:relative}
+  .section-tag{
+    display:inline-block;padding:6px 14px;border-radius:999px;
+    background:rgba(218,41,28,0.15);color:var(--mcd-red);
+    font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .section-title{
+    font-size:clamp(1.8rem,3.4vw,2.6rem);
+    font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;
+  }
+  .section-title .accent{color:var(--mcd-yellow)}
+  .section-sub{color:var(--mcd-muted);max-width:780px;margin-bottom:48px;font-size:1.05rem}
+
+  /* RISK SCORE OVERVIEW */
+  .score-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;
+  }
+  .score-card{
+    background:linear-gradient(135deg,var(--mcd-panel) 0%,var(--mcd-panel-2) 100%);
+    border:1px solid var(--mcd-border);
+    padding:24px;border-radius:16px;
+    position:relative;overflow:hidden;
+    transition:all 0.3s ease;
+  }
+  .score-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--s-color,var(--mcd-yellow));
+    transform:scaleX(0);transform-origin:left;
+    transition:transform 0.5s ease;
+  }
+  .score-card:hover{transform:translateY(-4px);border-color:var(--s-color,var(--mcd-yellow))}
+  .score-card:hover::before{transform:scaleX(1)}
+  .score-card .score-icon{
+    width:48px;height:48px;border-radius:12px;
+    background:var(--s-color,var(--mcd-yellow));
+    display:flex;align-items:center;justify-content:center;
+    color:#0E0E12;font-size:1.4rem;font-weight:900;
+    margin-bottom:14px;
+  }
+  .score-card .lbl{font-size:0.78rem;color:var(--mcd-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+  .score-card .val{font-size:2.2rem;font-weight:900;color:var(--s-color,var(--mcd-yellow));line-height:1.1}
+  .score-card .desc{font-size:0.82rem;color:var(--mcd-muted);margin-top:6px}
+
+  /* RISK MATRIX */
+  .matrix-layout{
+    display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:stretch;
+  }
+  @media(max-width:1000px){.matrix-layout{grid-template-columns:1fr}}
+
+  .matrix-container{
+    background:var(--mcd-panel);border:1px solid var(--mcd-border);
+    padding:28px;border-radius:18px;
+    display:flex;flex-direction:column;
+  }
+  .matrix-canvas-box{position:relative;height:580px;width:100%;cursor:default}
+  .matrix-canvas-box.has-pointer{cursor:pointer}
+
+  .matrix-side{
+    display:flex;flex-direction:column;gap:18px;
+  }
+
+  /* DETAIL PANEL */
+  .risk-detail-panel{
+    background:linear-gradient(135deg,var(--mcd-panel) 0%,var(--mcd-panel-2) 100%);
+    border:2px solid var(--mcd-border);
+    border-radius:16px;padding:22px;
+    min-height:280px;
+    transition:border-color 0.4s ease,box-shadow 0.4s ease;
+    position:relative;
+  }
+  .risk-detail-panel.active{
+    box-shadow:0 0 0 1px var(--detail-color,var(--mcd-yellow)) inset;
+  }
+  .detail-empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:30px 0;height:100%;min-height:240px;
+  }
+  .detail-empty .empty-icon{
+    width:54px;height:54px;border-radius:14px;
+    background:linear-gradient(135deg,var(--mcd-yellow),var(--mcd-orange));
+    color:#0E0E12;display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;font-weight:900;margin-bottom:14px;
+    animation:pointHint 2s ease-in-out infinite;
+  }
+  @keyframes pointHint{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(-6px)}
+  }
+  .detail-empty h4{font-size:1.05rem;margin-bottom:6px;color:var(--mcd-yellow)}
+  .detail-empty p{font-size:0.88rem;color:var(--mcd-muted);max-width:240px}
+
+  .detail-content{display:none;flex-direction:column;gap:12px}
+  .detail-content.show{display:flex;animation:detailIn 0.4s ease-out}
+  @keyframes detailIn{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .detail-cat-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .detail-cat-badge{
+    display:inline-block;padding:4px 12px;border-radius:6px;
+    font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;
+  }
+  .detail-cat-badge.strategic{background:rgba(255,199,44,0.18);color:var(--mcd-yellow)}
+  .detail-cat-badge.operational{background:rgba(59,130,246,0.18);color:var(--mcd-blue)}
+  .detail-cat-badge.financial{background:rgba(168,85,247,0.18);color:var(--mcd-purple)}
+  .detail-cat-badge.external{background:rgba(218,41,28,0.18);color:#FF8A7C}
+  .detail-sev-pill{
+    padding:3px 10px;border-radius:6px;font-size:0.65rem;font-weight:800;
+    text-transform:uppercase;letter-spacing:0.08em;
+  }
+  .detail-sev-pill.critical{background:rgba(218,41,28,0.18);color:#FF8A7C}
+  .detail-sev-pill.high{background:rgba(255,138,0,0.18);color:var(--mcd-orange)}
+  .detail-sev-pill.medium{background:rgba(255,199,44,0.18);color:var(--mcd-yellow)}
+  .detail-sev-pill.low{background:rgba(39,194,138,0.18);color:var(--mcd-green)}
+
+  .detail-name{font-size:1.25rem;font-weight:800;line-height:1.25}
+  .detail-meta{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  }
+  .detail-meta-item{
+    background:rgba(0,0,0,0.3);border-radius:10px;padding:10px 8px;text-align:center;
+  }
+  .detail-meta-item .l{font-size:0.62rem;color:var(--mcd-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+  .detail-meta-item .v{font-size:1.4rem;font-weight:900;color:var(--mcd-yellow);line-height:1}
+  .detail-bars{display:flex;flex-direction:column;gap:8px;margin:4px 0}
+  .detail-bar{display:flex;align-items:center;gap:8px;font-size:0.8rem}
+  .detail-bar-label{width:80px;color:var(--mcd-muted);font-size:0.78rem}
+  .detail-bar-track{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+  .detail-bar-fill{height:100%;background:linear-gradient(90deg,var(--mcd-yellow),var(--mcd-red));border-radius:6px;width:0;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+  .detail-bar-val{width:24px;text-align:right;color:var(--mcd-text);font-weight:700;font-size:0.8rem}
+  .detail-desc{
+    font-size:0.86rem;color:var(--mcd-muted);line-height:1.55;
+    padding-top:6px;border-top:1px dashed var(--mcd-border);
+  }
+  .detail-mit{
+    padding:10px 12px;background:rgba(39,194,138,0.08);
+    border-left:3px solid var(--mcd-green);border-radius:0 8px 8px 0;
+    font-size:0.82rem;color:var(--mcd-text);
+  }
+  .detail-mit strong{color:var(--mcd-green);display:block;margin-bottom:2px}
+
+  .legend-card{
+    background:var(--mcd-panel);border:1px solid var(--mcd-border);
+    border-radius:14px;padding:20px;
+  }
+  .legend-card h4{font-size:0.95rem;margin-bottom:12px;color:var(--mcd-yellow)}
+  .legend-zone{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.85rem}
+  .legend-zone .swatch{width:18px;height:18px;border-radius:4px;flex-shrink:0}
+  .legend-zone .swatch.crit{background:rgba(218,41,28,0.6);border:1px solid var(--mcd-red)}
+  .legend-zone .swatch.high{background:rgba(255,138,0,0.6);border:1px solid var(--mcd-orange)}
+  .legend-zone .swatch.med{background:rgba(255,199,44,0.6);border:1px solid var(--mcd-yellow)}
+  .legend-zone .swatch.low{background:rgba(39,194,138,0.6);border:1px solid var(--mcd-green)}
+  .legend-zone .scoring{margin-left:auto;color:var(--mcd-muted);font-size:0.78rem;font-family:monospace}
+  .legend-cat{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.85rem}
+  .legend-cat .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .legend-cat .dot.strategic{background:var(--mcd-yellow);box-shadow:0 0 8px var(--mcd-yellow)}
+  .legend-cat .dot.operational{background:var(--mcd-blue);box-shadow:0 0 8px var(--mcd-blue)}
+  .legend-cat .dot.financial{background:var(--mcd-purple);box-shadow:0 0 8px var(--mcd-purple)}
+  .legend-cat .dot.external{background:var(--mcd-red);box-shadow:0 0 8px var(--mcd-red)}
+
+  .formula-card{
+    background:linear-gradient(135deg,rgba(255,199,44,0.08),var(--mcd-panel));
+    border:1px solid rgba(255,199,44,0.3);
+    border-radius:14px;padding:20px;
+  }
+  .formula-card .formula{
+    font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--mcd-yellow);
+    text-align:center;padding:14px;background:rgba(0,0,0,0.3);border-radius:10px;margin:10px 0;
+  }
+  .formula-card p{font-size:0.85rem;color:var(--mcd-muted)}
+
+  /* TOP RISKS */
+  .top-risks-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;
+  }
+  .top-risk-card{
+    background:linear-gradient(135deg,var(--mcd-panel) 0%,var(--mcd-panel-2) 100%);
+    border:1px solid var(--mcd-border);
+    border-left:5px solid var(--r-color,var(--mcd-red));
+    border-radius:16px;padding:24px;
+    transition:all 0.3s ease;
+    position:relative;overflow:hidden;
+  }
+  .top-risk-card:hover{transform:translateY(-4px);border-color:var(--r-color,var(--mcd-red))}
+  .top-risk-card::after{
+    content:'';position:absolute;top:0;right:0;width:120px;height:120px;
+    background:var(--r-color,var(--mcd-red));
+    opacity:0.06;border-radius:50%;
+    transform:translate(40%,-40%);
+    transition:transform 0.5s ease;
+  }
+  .top-risk-card:hover::after{transform:translate(20%,-30%) scale(1.4)}
+  .risk-rank{
+    display:inline-block;padding:4px 10px;border-radius:6px;
+    background:var(--r-color,var(--mcd-red));color:#0E0E12;
+    font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;
+    margin-bottom:12px;
+  }
+  .risk-card-header{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;
+  }
+  .risk-card-header h3{font-size:1.1rem;font-weight:800;line-height:1.3;flex:1}
+  .risk-score-badge{
+    display:flex;flex-direction:column;align-items:center;
+    padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:10px;flex-shrink:0;
+  }
+  .risk-score-badge .num{
+    font-size:1.4rem;font-weight:900;color:var(--r-color,var(--mcd-red));line-height:1;
+  }
+  .risk-score-badge .lbl{font-size:0.6rem;color:var(--mcd-muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
+  .risk-meta{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;
+  }
+  .risk-meta-item{
+    padding:8px 10px;background:rgba(0,0,0,0.25);border-radius:8px;text-align:center;
+  }
+  .risk-meta-item .l{font-size:0.62rem;color:var(--mcd-muted);text-transform:uppercase;letter-spacing:0.06em}
+  .risk-meta-item .v{font-size:1rem;font-weight:800;color:var(--mcd-text);margin-top:2px}
+  .risk-desc{font-size:0.88rem;color:var(--mcd-muted);line-height:1.55}
+  .risk-mit{
+    margin-top:12px;padding:10px 12px;
+    background:rgba(39,194,138,0.08);border-left:3px solid var(--mcd-green);
+    border-radius:0 8px 8px 0;font-size:0.82rem;color:var(--mcd-text);
+  }
+  .risk-mit strong{color:var(--mcd-green)}
+
+  /* RISK CATEGORIES */
+  .cat-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;
+  }
+  .cat-card{
+    background:var(--mcd-panel);border:1px solid var(--mcd-border);
+    border-radius:18px;padding:28px;position:relative;overflow:hidden;
+    transition:all 0.4s ease;
+  }
+  .cat-card:hover{transform:translateY(-6px);border-color:var(--cat-color,var(--mcd-yellow))}
+  .cat-icon{
+    width:54px;height:54px;border-radius:14px;
+    background:var(--cat-color,var(--mcd-yellow));color:#0E0E12;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;font-weight:900;margin-bottom:16px;
+  }
+  .cat-card h3{font-size:1.2rem;margin-bottom:6px;font-weight:800}
+  .cat-card .cat-desc{color:var(--mcd-muted);font-size:0.9rem;margin-bottom:16px}
+  .cat-list{list-style:none;padding:0}
+  .cat-list li{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px dashed var(--mcd-border);font-size:0.88rem;
+    transition:padding 0.2s ease;
+  }
+  .cat-list li:hover{padding-left:6px}
+  .cat-list li:last-child{border-bottom:none}
+  .cat-list .risk-name{flex:1;color:var(--mcd-text)}
+  .cat-list .risk-score{
+    font-family:monospace;font-size:0.78rem;font-weight:700;
+    padding:3px 8px;border-radius:6px;flex-shrink:0;
+  }
+  .risk-score.critical{background:rgba(218,41,28,0.2);color:#FF8A7C}
+  .risk-score.high{background:rgba(255,138,0,0.2);color:var(--mcd-orange)}
+  .risk-score.medium{background:rgba(255,199,44,0.2);color:var(--mcd-yellow)}
+  .risk-score.low{background:rgba(39,194,138,0.2);color:var(--mcd-green)}
+
+  /* MITIGATION */
+  .mit-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;
+  }
+  .mit-card{
+    background:linear-gradient(135deg,rgba(39,194,138,0.06),var(--mcd-panel));
+    border:1px solid rgba(39,194,138,0.2);
+    border-radius:14px;padding:22px;
+    transition:all 0.3s ease;
+  }
+  .mit-card:hover{border-color:var(--mcd-green);transform:translateY(-3px)}
+  .mit-card .check{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--mcd-green);color:#0E0E12;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.2rem;font-weight:900;margin-bottom:12px;
+  }
+  .mit-card h4{font-size:1rem;margin-bottom:8px;color:var(--mcd-green)}
+  .mit-card p{font-size:0.88rem;color:var(--mcd-muted);line-height:1.55}
+
+  /* VERDICT */
+  .verdict-banner{
+    background:linear-gradient(135deg,rgba(218,41,28,0.15),rgba(255,138,0,0.1));
+    border:1px solid rgba(255,138,0,0.3);
+    border-radius:20px;padding:36px;text-align:center;
+  }
+  .verdict-banner h3{
+    font-size:clamp(1.4rem,2.6vw,2rem);margin-bottom:12px;
+    background:linear-gradient(135deg,var(--mcd-yellow),var(--mcd-red));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .verdict-banner p{color:var(--mcd-text);font-size:1.05rem;max-width:820px;margin:0 auto}
+  .verdict-cards{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:24px;
+  }
+  .verdict-card{
+    background:rgba(0,0,0,0.3);border-radius:12px;padding:18px;
+    border:1px solid var(--mcd-border);
+  }
+  .verdict-card .l{font-size:0.7rem;color:var(--mcd-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+  .verdict-card .v{font-size:1.2rem;font-weight:800;color:var(--mcd-yellow)}
+
+  /* FOOTER */
+  footer{
+    margin-top:60px;padding:40px 0;
+    border-top:1px solid var(--mcd-border);text-align:center;
+    color:var(--mcd-muted);font-size:0.85rem;
+  }
+  footer a{color:var(--mcd-yellow);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  .pulse{animation:pulse 2.5s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- ANALYST BADGE -->
+<div class="analyst-badges">
+  <a class="analyst-badge" href="https://www.linkedin.com/in/rodrigo-silva-92a402334/" target="_blank" rel="noopener">
+    <div class="analyst-avatar">RS</div>
+    <div class="analyst-info">
+      <div class="analyst-label">Analista</div>
+      <div class="analyst-name">Rodrigo Silva</div>
+    </div>
+    <svg class="linkedin-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68 1.69 1.69 0 0 0-1.68-1.69 1.69 1.69 0 0 0-1.69 1.69 1.68 1.68 0 0 0 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+  </a>
+  <a class="analyst-badge" href="https://www.linkedin.com/company/asclub/?viewAsMember=true" target="_blank" rel="noopener">
+    <div class="analyst-avatar">AS</div>
+    <div class="analyst-info">
+      <div class="analyst-label">Comunidade</div>
+      <div class="analyst-name">ASCLUB</div>
+    </div>
+    <svg class="linkedin-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68 1.69 1.69 0 0 0-1.68-1.69 1.69 1.69 0 0 0-1.69 1.69 1.68 1.68 0 0 0 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+  </a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-badge pulse">Análise Fundamental · NYSE: MCD · Risco</span>
+  <div class="risk-icon-wrap">
+    <svg class="warning-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="warnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#FFC72C"/>
+          <stop offset="50%" stop-color="#FF8A00"/>
+          <stop offset="100%" stop-color="#DA291C"/>
+        </linearGradient>
+      </defs>
+      <path d="M50,8 L92,82 L8,82 Z" fill="url(#warnGrad)" stroke="#FFC72C" stroke-width="2" stroke-linejoin="round"/>
+      <rect x="46" y="34" width="8" height="26" rx="3" fill="#0E0E12"/>
+      <circle cx="50" cy="71" r="4" fill="#0E0E12"/>
+    </svg>
+  </div>
+  <h1>Mapeamento<br>de Riscos</h1>
+  <span class="ticker">
+    <span style="width:8px;height:8px;border-radius:50%;background:var(--mcd-orange);box-shadow:0 0 8px var(--mcd-orange)"></span>
+    16 riscos identificados · 3 críticos · 4 altos · 9 médios · perfil global moderado
+  </span>
+  <p class="subtitle">Identificação, scoring e classificação dos riscos que podem afetar a tese de investimento na McDonald's. A matriz cruza probabilidade e impacto numa escala de 1 a 5, com cada risco posicionado segundo a sua severidade combinada.</p>
+  <div class="scroll-indicator">↓ Scroll</div>
+</section>
+
+<!-- 1. SCORE OVERVIEW -->
+<section>
+  <div class="container">
+    <span class="section-tag">01 · Visão Geral</span>
+    <h2 class="section-title">O perfil de <span class="accent">risco agregado</span></h2>
+    <p class="section-sub">Sumário quantitativo dos 16 riscos mapeados, agrupados por severidade. O score individual resulta da multiplicação probabilidade × impacto numa escala de 1 a 25.</p>
+
+    <div class="score-grid">
+      <div class="score-card reveal" style="--s-color:var(--mcd-red)">
+        <div class="score-icon">⚠</div>
+        <div class="lbl">Riscos críticos</div>
+        <div class="val">3</div>
+        <div class="desc">Score 15-25 · ação prioritária</div>
+      </div>
+      <div class="score-card reveal" style="--s-color:var(--mcd-orange)">
+        <div class="score-icon">▲</div>
+        <div class="lbl">Riscos altos</div>
+        <div class="val">4</div>
+        <div class="desc">Score 10-14 · monitorização ativa</div>
+      </div>
+      <div class="score-card reveal" style="--s-color:var(--mcd-yellow)">
+        <div class="score-icon">●</div>
+        <div class="lbl">Riscos médios</div>
+        <div class="val">9</div>
+        <div class="desc">Score 5-9 · gestão regular</div>
+      </div>
+      <div class="score-card reveal" style="--s-color:var(--mcd-green)">
+        <div class="score-icon">✓</div>
+        <div class="lbl">Score médio ponderado</div>
+        <div class="val">9.4</div>
+        <div class="desc">Perfil moderado · &lt;15 = aceitável</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. RISK MATRIX -->
+<section>
+  <div class="container">
+    <span class="section-tag">02 · Matriz de Risco</span>
+    <h2 class="section-title">A matriz <span class="accent">5 × 5</span> · probabilidade × impacto</h2>
+    <p class="section-sub">Os 16 riscos posicionados em coordenadas (probabilidade, impacto). O fundo da matriz transmite a severidade da combinação — verde nas zonas de baixo risco, vermelho nas zonas críticas. A cor do ponto indica a categoria.</p>
+
+    <div class="matrix-layout">
+      <div class="matrix-container reveal">
+        <div class="matrix-canvas-box"><canvas id="riskMatrix"></canvas></div>
+      </div>
+
+      <div class="matrix-side">
+        <div class="risk-detail-panel reveal" id="riskDetail">
+          <div class="detail-empty" id="detailEmpty">
+            <div class="empty-icon">↗</div>
+            <h4>Selecciona um risco</h4>
+            <p>Clica num ponto ou numa label da matriz para ver a ficha detalhada do risco.</p>
+          </div>
+          <div class="detail-content" id="detailContent">
+            <div class="detail-cat-row">
+              <span class="detail-cat-badge" id="detailCat">Estratégico</span>
+              <span class="detail-sev-pill" id="detailSev">Crítico</span>
+            </div>
+            <div class="detail-name" id="detailName">—</div>
+            <div class="detail-meta">
+              <div class="detail-meta-item"><div class="l">Prob.</div><div class="v" id="detailProb">—</div></div>
+              <div class="detail-meta-item"><div class="l">Impacto</div><div class="v" id="detailImp">—</div></div>
+              <div class="detail-meta-item"><div class="l">Score</div><div class="v" id="detailScore">—</div></div>
+            </div>
+            <div class="detail-bars">
+              <div class="detail-bar">
+                <div class="detail-bar-label">Probabilidade</div>
+                <div class="detail-bar-track"><div class="detail-bar-fill" id="detailProbBar"></div></div>
+                <div class="detail-bar-val" id="detailProbV">—</div>
+              </div>
+              <div class="detail-bar">
+                <div class="detail-bar-label">Impacto</div>
+                <div class="detail-bar-track"><div class="detail-bar-fill" id="detailImpBar"></div></div>
+                <div class="detail-bar-val" id="detailImpV">—</div>
+              </div>
+            </div>
+            <p class="detail-desc" id="detailDesc">—</p>
+            <div class="detail-mit"><strong>Mitigação</strong><span id="detailMit">—</span></div>
+          </div>
+        </div>
+
+        <div class="legend-card reveal">
+          <h4>Zonas de severidade</h4>
+          <div class="legend-zone"><div class="swatch crit"></div>Crítico <span class="scoring">15 – 25</span></div>
+          <div class="legend-zone"><div class="swatch high"></div>Alto <span class="scoring">10 – 14</span></div>
+          <div class="legend-zone"><div class="swatch med"></div>Médio <span class="scoring">5 – 9</span></div>
+          <div class="legend-zone"><div class="swatch low"></div>Baixo <span class="scoring">1 – 4</span></div>
+        </div>
+
+        <div class="legend-card reveal">
+          <h4>Categoria (cor do ponto)</h4>
+          <div class="legend-cat"><div class="dot strategic"></div>Estratégico</div>
+          <div class="legend-cat"><div class="dot operational"></div>Operacional</div>
+          <div class="legend-cat"><div class="dot financial"></div>Financeiro</div>
+          <div class="legend-cat"><div class="dot external"></div>Externo</div>
+        </div>
+
+        <div class="formula-card reveal">
+          <h4 style="color:var(--mcd-yellow);margin-bottom:6px">Cálculo do score</h4>
+          <div class="formula">Score = Probabilidade × Impacto</div>
+          <p>Cada risco recebe classificação de 1 a 5 em ambos os eixos. O produto define a severidade global numa escala de 1 a 25.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. TOP CRITICAL RISKS -->
+<section>
+  <div class="container">
+    <span class="section-tag">03 · Riscos Críticos</span>
+    <h2 class="section-title">Os <span class="accent">três grandes</span> riscos a monitorizar</h2>
+    <p class="section-sub">Riscos com score igual ou superior a 15. Estes são os que concentram a maior fração do risco agregado e devem ser o foco prioritário do acompanhamento trimestral.</p>
+
+    <div class="top-risks-grid">
+      <div class="top-risk-card reveal" style="--r-color:var(--mcd-red)">
+        <div class="risk-rank">#1 · Crítico</div>
+        <div class="risk-card-header">
+          <h3>Concorrência da Chick-fil-A</h3>
+          <div class="risk-score-badge">
+            <div class="num">16</div>
+            <div class="lbl">Score</div>
+          </div>
+        </div>
+        <div class="risk-meta">
+          <div class="risk-meta-item"><div class="l">Probabilidade</div><div class="v">4 / 5</div></div>
+          <div class="risk-meta-item"><div class="l">Impacto</div><div class="v">4 / 5</div></div>
+        </div>
+        <p class="risk-desc">A Chick-fil-A apresenta produtividade por loja de $7.5M (vs $3.96M da MCD). Cada nova abertura potencialmente desvia tráfego do almoço e do breakfast. Apontada pela própria gestão da MCD como a maior pressão competitiva.</p>
+        <div class="risk-mit"><strong>Mitigação:</strong> Reforço da estratégia de chicken (McCrispy), expansão de drive-thru e aceleração do desenvolvimento (50K lojas em 2027) para defender território geográfico.</div>
+      </div>
+
+      <div class="top-risk-card reveal" style="--r-color:var(--mcd-red)">
+        <div class="risk-rank">#2 · Crítico</div>
+        <div class="risk-card-header">
+          <h3>GLP-1 e mudança de hábitos alimentares</h3>
+          <div class="risk-score-badge">
+            <div class="num">16</div>
+            <div class="lbl">Score</div>
+          </div>
+        </div>
+        <div class="risk-meta">
+          <div class="risk-meta-item"><div class="l">Probabilidade</div><div class="v">4 / 5</div></div>
+          <div class="risk-meta-item"><div class="l">Impacto</div><div class="v">4 / 5</div></div>
+        </div>
+        <p class="risk-desc">Medicamentos para emagrecimento (Ozempic, Wegovy, Mounjaro) reduzem o consumo calórico médio em 20-30%. Estima-se que &gt;30M de americanos venham a usá-los até 2030. Risco estrutural à demanda de fast food calórico.</p>
+        <div class="risk-mit"><strong>Mitigação:</strong> Diversificação do menu para opções de menor caloria, reforço de saladas e wraps, e foco no breakfast/coffee onde a sensibilidade calórica é menor.</div>
+      </div>
+
+      <div class="top-risk-card reveal" style="--r-color:var(--mcd-red)">
+        <div class="risk-rank">#3 · Crítico</div>
+        <div class="risk-card-header">
+          <h3>Inflação salarial nos EUA</h3>
+          <div class="risk-score-badge">
+            <div class="num">15</div>
+            <div class="lbl">Score</div>
+          </div>
+        </div>
+        <div class="risk-meta">
+          <div class="risk-meta-item"><div class="l">Probabilidade</div><div class="v">5 / 5</div></div>
+          <div class="risk-meta-item"><div class="l">Impacto</div><div class="v">3 / 5</div></div>
+        </div>
+        <p class="risk-desc">Lei AB1228 da Califórnia subiu o salário mínimo do fast food para $20/hora. Outros estados a seguir o exemplo. Pressiona margens dos franqueados e gera tensão sobre os royalties pagos à MCD.</p>
+        <div class="risk-mit"><strong>Mitigação:</strong> Investimento em automação (kiosks, AI ordering), otimização de menu para reduzir labor cost e renegociação seletiva de fees com franqueados afetados.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. CATEGORIES BREAKDOWN -->
+<section>
+  <div class="container">
+    <span class="section-tag">04 · Categorias</span>
+    <h2 class="section-title">Riscos <span class="accent">organizados</span> por natureza</h2>
+    <p class="section-sub">A taxonomia clássica de risco corporativo agrupa os riscos em quatro famílias. Esta organização permite alocar responsabilidades de gestão e desenhar políticas de mitigação adequadas a cada tipo.</p>
+
+    <div class="cat-grid">
+      <div class="cat-card reveal" style="--cat-color:var(--mcd-yellow)">
+        <div class="cat-icon">⚔</div>
+        <h3>Estratégicos</h3>
+        <p class="cat-desc">Riscos que afetam o posicionamento competitivo e a tese de crescimento de longo prazo.</p>
+        <ul class="cat-list">
+          <li><span class="risk-name">Concorrência Chick-fil-A</span><span class="risk-score critical">16</span></li>
+          <li><span class="risk-name">GLP-1 / hábitos alimentares</span><span class="risk-score critical">16</span></li>
+          <li><span class="risk-name">Concorrência fast-casual (CMG)</span><span class="risk-score high">12</span></li>
+          <li><span class="risk-name">Concentração US + IOM</span><span class="risk-score high">10</span></li>
+          <li><span class="risk-name">Cozinhas autónomas / robótica</span><span class="risk-score medium">6</span></li>
+        </ul>
+      </div>
+
+      <div class="cat-card reveal" style="--cat-color:var(--mcd-blue)">
+        <div class="cat-icon">⚙</div>
+        <h3>Operacionais</h3>
+        <p class="cat-desc">Riscos ligados à execução do dia-a-dia, supply chain e relação com franqueados.</p>
+        <ul class="cat-list">
+          <li><span class="risk-name">Inflação salarial US</span><span class="risk-score critical">15</span></li>
+          <li><span class="risk-name">Tensão com franqueados</span><span class="risk-score high">12</span></li>
+          <li><span class="risk-name">Cybersecurity / data breach</span><span class="risk-score high">12</span></li>
+          <li><span class="risk-name">Inflação de matérias-primas</span><span class="risk-score medium">9</span></li>
+          <li><span class="risk-name">Disrupção da supply chain</span><span class="risk-score medium">9</span></li>
+        </ul>
+      </div>
+
+      <div class="cat-card reveal" style="--cat-color:var(--mcd-purple)">
+        <div class="cat-icon">$</div>
+        <h3>Financeiros</h3>
+        <p class="cat-desc">Riscos de capital, taxas de juro, câmbio e estrutura de balanço.</p>
+        <ul class="cat-list">
+          <li><span class="risk-name">Forex (USD strength)</span><span class="risk-score medium">8</span></li>
+          <li><span class="risk-name">Subida da taxa de juro</span><span class="risk-score medium">6</span></li>
+          <li><span class="risk-name">Outlook negativo S&amp;P</span><span class="risk-score medium">6</span></li>
+        </ul>
+      </div>
+
+      <div class="cat-card reveal" style="--cat-color:var(--mcd-red)">
+        <div class="cat-icon">🌐</div>
+        <h3>Externos</h3>
+        <p class="cat-desc">Riscos sobre os quais a empresa tem pouco ou nenhum controlo direto.</p>
+        <ul class="cat-list">
+          <li><span class="risk-name">Boicotes geopolíticos</span><span class="risk-score medium">9</span></li>
+          <li><span class="risk-name">Regulação climática / ESG</span><span class="risk-score medium">8</span></li>
+          <li><span class="risk-name">Regulação alimentar / fiscal</span><span class="risk-score medium">6</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. MITIGATION PLAYBOOK -->
+<section>
+  <div class="container">
+    <span class="section-tag">05 · Playbook de Mitigação</span>
+    <h2 class="section-title">Como a McDonald's <span class="accent">se defende</span></h2>
+    <p class="section-sub">Defesas estruturais que reduzem a exposição agregada e que continuam a justificar uma classificação de risco moderada apesar dos vetores críticos identificados.</p>
+
+    <div class="mit-grid">
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Diversificação geográfica</h4>
+        <p>Operação em mais de 100 países com 3 segmentos reportáveis (US, IOM, IDL). Reduz o impacto de choques locais ou regionais sobre o resultado consolidado.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Modelo capital-light</h4>
+        <p>95% das lojas franchised. O capex direto é reduzido e o risco operacional do dia-a-dia transferido aos franqueados. A MCD recebe royalties e rendas.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Carteira imobiliária</h4>
+        <p>$40B+ em imóveis detidos. Funciona como hedge de valor em cenários inflacionários e gera fluxos previsíveis mesmo em recessões.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Investment grade rating</h4>
+        <p>Baa1 / BBB+ permite acesso a dívida em condições favoráveis. Spread de crédito reduzido protege contra subidas das taxas de juro.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Pricing power da marca</h4>
+        <p>Top 10 mundial em valor de marca. Capacidade de repassar inflação aos preços de venda sem perda significativa de tráfego.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Liquidez e cash-flow</h4>
+        <p>$7.2B de FCF anual cobre confortavelmente $5B de dividendos. Margem de manobra para acomodar choques operacionais sem cortar a remuneração ao acionista.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Loyalty program como dado</h4>
+        <p>210M utilizadores ativos geram dados de comportamento que permitem antecipar mudanças de preferência e ajustar menu/preços antes da concorrência.</p>
+      </div>
+      <div class="mit-card reveal">
+        <div class="check">✓</div>
+        <h4>Histórico de resiliência</h4>
+        <p>49 anos consecutivos de aumentos de dividendo. Sobreviveu a seis recessões, duas crises financeiras e uma pandemia sem cortar capital returns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. VERDICT -->
+<section>
+  <div class="container">
+    <div class="verdict-banner reveal">
+      <h3>Veredicto sobre o perfil de risco</h3>
+      <p>O perfil de risco da McDonald's é <strong>moderado</strong>. Existem três riscos críticos com potencial de afetar materialmente a tese (Chick-fil-A, GLP-1 e inflação salarial), mas estão estruturalmente mitigados pelo modelo capital-light, pela diversificação geográfica e pela base imobiliária. O score médio ponderado de 9.4 (numa escala de 1 a 25) é coerente com uma empresa madura e investment grade. Para um portfólio fundamental, MCD enquadra-se na bucket defensiva com qualidade — não é growth puro nem é uma reestruturação especulativa.</p>
+      <div class="verdict-cards">
+        <div class="verdict-card"><div class="l">Perfil Global</div><div class="v">Moderado</div></div>
+        <div class="verdict-card"><div class="l">Score Médio</div><div class="v">9.4 / 25</div></div>
+        <div class="verdict-card"><div class="l">Riscos Críticos</div><div class="v">3 de 16</div></div>
+        <div class="verdict-card"><div class="l">Mitigação</div><div class="v">Forte</div></div>
+        <div class="verdict-card"><div class="l">Bucket recomendada</div><div class="v">Defensivo</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Mapeamento de Risco · McDonald's Corporation (NYSE: MCD) · FY 2025</p>
+    <p style="margin-top:8px">Fontes: <a href="https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/mcd-20251231.htm" target="_blank">MCD 10-K 2025 (Risk Factors)</a> · <a href="https://www.moodys.com/credit-ratings/McDonalds-Corporation-credit-rating-479500" target="_blank">Moody's Credit Report</a> · <a href="https://www.spglobal.com/ratings/en/regulatory/article/-/view/type/HTML/id/3172986" target="_blank">S&amp;P Global Ratings</a> · <a href="https://www.restaurantbusinessonline.com/financing/chick-fil-not-burger-king-or-wendys-mcdonalds-biggest-competitor" target="_blank">Restaurant Business Online</a></p>
+    <p style="margin-top:14px;color:#666">Documento de apoio à análise fundamental — não constitui recomendação de investimento.</p>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) e.target.classList.add('visible');
+    });
+  },{threshold:0.12});
+
+  document.querySelectorAll('.reveal,.score-card,.top-risk-card,.cat-card,.mit-card,.matrix-container,.formula-card,.legend-card,.verdict-banner').forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+
+  Chart.defaults.color = '#9A9AA8';
+  Chart.defaults.font.family = "'Inter','Segoe UI',sans-serif";
+
+  // ===== Categories =====
+  const CAT_COLORS = {
+    strategic:'#FFC72C', operational:'#3B82F6', financial:'#A855F7', external:'#DA291C'
+  };
+  const CAT_LABEL = {
+    strategic:'Estratégico', operational:'Operacional', financial:'Financeiro', external:'Externo'
+  };
+  const SEV_COLORS = {
+    critical:'#DA291C', high:'#FF8A00', medium:'#FFC72C', low:'#27C28A'
+  };
+  function severity(score){
+    if(score >= 15) return 'critical';
+    if(score >= 10) return 'high';
+    if(score >= 5) return 'medium';
+    return 'low';
+  }
+  function severityLabel(s){
+    return {critical:'Crítico',high:'Alto',medium:'Médio',low:'Baixo'}[s];
+  }
+
+  // ===== Risk dataset com descrição e mitigação =====
+  const RISKS = [
+    {x:4, y:4, n:'Chick-fil-A', c:'strategic',
+     d:'A Chick-fil-A apresenta produtividade unitária de $7.5M (vs $3.96M MCD). Cada nova abertura desloca tráfego dos momentos almoço e breakfast em mercados sobrepostos.',
+     m:'Reforço da estratégia de chicken (McCrispy), aceleração do drive-thru e desenvolvimento (50K lojas em 2027) para defender território geográfico.'},
+    {x:4, y:4, n:'GLP-1 / hábitos saudáveis', c:'external',
+     d:'Medicamentos para emagrecimento (Ozempic, Wegovy, Mounjaro) reduzem o consumo calórico médio em 20-30%. Estima-se que mais de 30M de americanos venham a usá-los até 2030.',
+     m:'Diversificação do menu para opções de menor caloria (saladas, wraps), reforço do breakfast e do coffee onde a sensibilidade calórica é menor.'},
+    {x:5, y:3, n:'Inflação salarial US', c:'operational',
+     d:'Lei AB1228 da Califórnia subiu o salário mínimo do fast food para $20/h. Outros estados a seguir o exemplo. Pressiona margens dos franqueados e gera tensão sobre os royalties.',
+     m:'Investimento em automação (kiosks, AI ordering), otimização de menu para reduzir labor cost e renegociação seletiva de fees em mercados pressionados.'},
+    {x:3, y:4, n:'Tensão franqueados', c:'operational',
+     d:'A National Owners Association (NOA) e franqueados individuais têm pressionado MCD por margens menores, fee de marketing mais baixo e maior partilha de custos digitais.',
+     m:'Programas de apoio operacional, ajustes pontuais de fees em mercados pressionados, governance reforçada do diálogo via System Council.'},
+    {x:3, y:4, n:'Cybersecurity', c:'operational',
+     d:'A base de loyalty atinge 210M utilizadores. Um data breach de credenciais e padrões de consumo teria impacto reputacional e regulatório significativo (GDPR, CCPA).',
+     m:'Investimento em segmentação de redes, encryption end-to-end no app, programa Zero Trust e auditorias externas trimestrais.'},
+    {x:4, y:3, n:'Concorrência fast-casual', c:'strategic',
+     d:'Chipotle (CMG), Cava e similares oferecem percepção de qualidade superior por preço próximo. Trade-up estrutural de consumidores high-income pode reduzir a base demográfica core.',
+     m:'Premium tier de menu (Signature Crafted), foco em qualidade percebida, rebranding visual de lojas e parcerias culturais (Travis Scott, BTS).'},
+    {x:5, y:2, n:'Concentração US/IOM', c:'strategic',
+     d:'~91% da receita vem de US (40.3%) + IOM (50.7%). Choque local em qualquer destes mercados afeta materialmente o consolidado.',
+     m:'Aceleração do segmento IDL (China, Índia, Médio Oriente) via licenciados, e diversificação intra-IOM com expansão acelerada na Europa Central.'},
+    {x:3, y:3, n:'Boicote geopolítico', c:'external',
+     d:'Conflito no Médio Oriente (2024) provocou queda de comp sales no IDL. Marcas globais ficam expostas quando posições políticas são percebidas. Risco recorrente em ciclos de tensão.',
+     m:'Comunicação local autónoma via licenciados, pause de campanhas globais em zonas sensíveis, doações via fundações independentes.'},
+    {x:3, y:3, n:'Inflação de commodities', c:'operational',
+     d:'Subida persistente de carne, queijo, batata e óleos comprime margens dos franqueados. Mitigado pela escala mas não imune a choques prolongados (gripe aviária, secas).',
+     m:'Contratos plurianuais com fornecedores, hedging seletivo de commodities, diversificação de fornecedores por geografia.'},
+    {x:3, y:3, n:'Disrupção supply chain', c:'operational',
+     d:'Disrupções logísticas (canal Suez, ataques Houthi, eventos climáticos) podem paralisar lojas localmente. Em 2024 surto de E. coli em cebolas levou a remoção do Quarter Pounder em 12 estados.',
+     m:'Centros de distribuição regionais, dual sourcing para SKUs críticos, sistemas de rastreabilidade end-to-end (HACCP).'},
+    {x:4, y:2, n:'Forex / USD strength', c:'financial',
+     d:'~50% da receita é internacional. USD forte deprime os resultados convertidos. Em 2025 o impacto cambial subtraiu ~1pp ao crescimento reportado.',
+     m:'Hedging via forwards e options, emissão de dívida em moedas locais (EUR, JPY, GBP) para cobertura natural, foco em métricas em constant currency.'},
+    {x:4, y:2, n:'ESG / clima', c:'external',
+     d:'Pressão regulatória crescente em emissões Scope 3 (cadeia de fornecedores). Sector beef é grande emissor. Riscos reputacionais ESG podem afetar acesso a capital.',
+     m:'Net-zero plan até 2050, parceria com Enel para energia solar nos centros logísticos, redução de embalagens (Better M Initiative).'},
+    {x:2, y:3, n:'Regulação alimentar', c:'external',
+     d:'Impostos sobre açúcar/sal, restrições de marketing infantil, rotulagem obrigatória de calorias. Já enfrentou estas pressões com sucesso (Reino Unido, Chile).',
+     m:'Reformulação contínua do menu (redução de açúcar, sal, gorduras saturadas), Happy Meal sem brinquedo plástico em alguns mercados.'},
+    {x:2, y:3, n:'Cozinhas autónomas', c:'strategic',
+     d:'Sweetgreen Infinite Kitchen, Chipotle Autocado e robô fritadeiras Miso reduzem labor cost. Podem corroer a vantagem de escala humana de MCD a 5-10 anos.',
+     m:'R&D interno em automação, pilotos com fritadeiras automáticas em lojas próprias, integração de IA no drive-thru (parceria IBM, agora interna).'},
+    {x:3, y:2, n:'Subida da taxa de juro', c:'financial',
+     d:'$40B de dívida — refinanciamento em ciclos de taxa alta encarece o serviço da dívida. Maturidades distribuídas mitigam, mas não eliminam.',
+     m:'Maturidades long-dated, mix predominantemente fixed-rate, capacidade de pré-pagamento via FCF de $7.2B.'},
+    {x:3, y:2, n:'Outlook negativo S&P', c:'financial',
+     d:'S&P revisou outlook para "Negative" mantendo rating BBB+. Downgrade implicaria spread mais alto na próxima emissão. Moody\'s mantém Baa1 estável.',
+     m:'Disciplina de capital allocation, manutenção de Debt/EBITDA &lt;3.0x, comunicação proactiva com agências.'}
+  ];
+
+  // ===== Jitter para pontos coincidentes =====
+  function applyJitter(risks){
+    const groups = {};
+    risks.forEach((r, i) => {
+      const k = `${r.x}_${r.y}`;
+      (groups[k] = groups[k] || []).push(i);
+    });
+    const out = risks.map(r => ({...r}));
+    Object.values(groups).forEach(idxs => {
+      if(idxs.length === 1) return;
+      const radius = 0.18;
+      idxs.forEach((idx, k) => {
+        const angle = -Math.PI/2 + (k * 2 * Math.PI / idxs.length);
+        out[idx].xPlot = out[idx].x + Math.cos(angle) * radius;
+        out[idx].yPlot = out[idx].y + Math.sin(angle) * radius;
+      });
+    });
+    out.forEach(r => {
+      if(r.xPlot === undefined) r.xPlot = r.x;
+      if(r.yPlot === undefined) r.yPlot = r.y;
+    });
+    return out;
+  }
+  const PLOT_RISKS = applyJitter(RISKS);
+
+  // ===== Estado de interação =====
+  let activeIdx = -1;
+  let hoverIdx = -1;
+  let labelRects = [];
+
+  // ===== Plugin: heatmap de fundo =====
+  const heatmapPlugin = {
+    id:'heatmap',
+    beforeDatasetsDraw(chart){
+      const {ctx, chartArea, scales} = chart;
+      if(!chartArea) return;
+      const xs = scales.x, ys = scales.y;
+      for(let p=1; p<=5; p++){
+        for(let i=1; i<=5; i++){
+          const score = p*i;
+          const sev = severity(score);
+          const colors = {critical:'rgba(218,41,28,0.16)',high:'rgba(255,138,0,0.14)',medium:'rgba(255,199,44,0.12)',low:'rgba(39,194,138,0.12)'};
+          const x1 = xs.getPixelForValue(p - 0.5);
+          const x2 = xs.getPixelForValue(p + 0.5);
+          const y1 = ys.getPixelForValue(i + 0.5);
+          const y2 = ys.getPixelForValue(i - 0.5);
+          ctx.fillStyle = colors[sev];
+          ctx.fillRect(x1, y1, x2-x1, y2-y1);
+          ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x1, y1, x2-x1, y2-y1);
+        }
+      }
+    }
+  };
+
+  // ===== Plugin: glow ring para riscos críticos + ponto activo =====
+  const glowPlugin = {
+    id:'glow',
+    beforeDatasetsDraw(chart){
+      const ctx = chart.ctx;
+      const meta = chart.getDatasetMeta(0);
+      meta.data.forEach((point, idx) => {
+        const r = RISKS[idx];
+        const score = r.x * r.y;
+        if(score >= 15){
+          // pulse-ish ring para críticos
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 18, 0, Math.PI*2);
+          ctx.fillStyle = 'rgba(218,41,28,0.12)';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 14, 0, Math.PI*2);
+          ctx.fillStyle = 'rgba(218,41,28,0.18)';
+          ctx.fill();
+          ctx.restore();
+        }
+        if(idx === activeIdx){
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 22, 0, Math.PI*2);
+          ctx.fillStyle = CAT_COLORS[r.c] + '30';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 16, 0, Math.PI*2);
+          ctx.strokeStyle = CAT_COLORS[r.c];
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+    }
+  };
+
+  // ===== Smart-placement das labels =====
+  function roundedRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  function rectsOverlap(a, b, pad=4){
+    return !(a.x + a.w + pad < b.x ||
+             b.x + b.w + pad < a.x ||
+             a.y + a.h + pad < b.y ||
+             b.y + b.h + pad < a.y);
+  }
+
+  function findLabelPlacement(point, w, h, chartArea, placedRects){
+    const cx = (chartArea.left + chartArea.right) / 2;
+    const cy = (chartArea.top + chartArea.bottom) / 2;
+    const outwardX = point.x > cx ? -1 : 1;
+    const outwardY = point.y > cy ? -1 : 1;
+    // Candidatos em ordem de preferência
+    const cands = [
+      {dx: outwardX*16, dy: 0, side: outwardX>0?'left':'right'},
+      {dx: outwardX*16, dy: -22, side: outwardX>0?'left':'right'},
+      {dx: outwardX*16, dy: 22, side: outwardX>0?'left':'right'},
+      {dx: -outwardX*16, dy: 0, side: outwardX<0?'left':'right'},
+      {dx: -outwardX*16, dy: -22, side: outwardX<0?'left':'right'},
+      {dx: -outwardX*16, dy: 22, side: outwardX<0?'left':'right'},
+      {dx: 0, dy: outwardY*22, side: 'center'},
+      {dx: 0, dy: -outwardY*22, side: 'center'},
+      {dx: outwardX*16, dy: -38, side: outwardX>0?'left':'right'},
+      {dx: outwardX*16, dy: 38, side: outwardX>0?'left':'right'}
+    ];
+    for(const c of cands){
+      let lx;
+      if(c.side === 'left') lx = point.x + c.dx - w;
+      else if(c.side === 'right') lx = point.x + c.dx;
+      else lx = point.x - w/2;
+      const ly = point.y + c.dy - h/2;
+      if(lx < chartArea.left + 4) continue;
+      if(lx + w > chartArea.right - 4) continue;
+      if(ly < chartArea.top + 4) continue;
+      if(ly + h > chartArea.bottom - 4) continue;
+      const r = {x:lx, y:ly, w:w, h:h};
+      const collides = placedRects.some(p => rectsOverlap(r, p));
+      if(!collides) return {x:lx, y:ly, w:w, h:h, side:c.side};
+    }
+    // Fallback: stack down a partir de (point.x+16, point.y)
+    let lx = Math.min(point.x + 16, chartArea.right - w - 4);
+    let ly = point.y - h/2;
+    let attempts = 0;
+    while(attempts < 30){
+      const r = {x:lx, y:ly, w:w, h:h};
+      const collides = placedRects.some(p => rectsOverlap(r, p));
+      if(!collides && ly + h <= chartArea.bottom - 4) return {x:lx, y:ly, w:w, h:h, side:'right'};
+      ly += h + 6;
+      attempts++;
+    }
+    return {x:lx, y:point.y - h/2, w:w, h:h, side:'right'};
+  }
+
+  // ===== Plugin: labels interativas =====
+  const labelsPlugin = {
+    id:'labels',
+    afterDatasetsDraw(chart){
+      const {ctx, chartArea} = chart;
+      if(!chartArea) return;
+      const meta = chart.getDatasetMeta(0);
+      ctx.save();
+      ctx.font = '600 11px Inter, sans-serif';
+      labelRects = [];
+
+      // Ordenar por score (maiores primeiro) para prioridade de placement
+      const order = RISKS.map((r,i)=>({i,score:r.x*r.y}))
+        .sort((a,b)=>b.score-a.score)
+        .map(o=>o.i);
+
+      // Pre-cálculo dos placements
+      const placements = new Array(RISKS.length);
+      const placedRects = [];
+      order.forEach(idx => {
+        const r = RISKS[idx];
+        const point = meta.data[idx];
+        if(!point) return;
+        const text = r.n;
+        const tw = ctx.measureText(text).width;
+        const w = tw + 14, h = 20;
+        const place = findLabelPlacement(point, w, h, chartArea, placedRects);
+        placements[idx] = place;
+        placedRects.push(place);
+      });
+
+      // Desenhar (ordem original para z-index estável; activo por último)
+      const drawOrder = RISKS.map((_,i)=>i)
+        .filter(i => i !== activeIdx)
+        .concat(activeIdx >= 0 ? [activeIdx] : []);
+
+      drawOrder.forEach(idx => {
+        const r = RISKS[idx];
+        const point = meta.data[idx];
+        const p = placements[idx];
+        if(!point || !p) return;
+
+        const isActive = idx === activeIdx;
+        const isHover = idx === hoverIdx;
+        const catColor = CAT_COLORS[r.c];
+
+        // Conector (linha do ponto até à label)
+        ctx.beginPath();
+        ctx.moveTo(point.x, point.y);
+        const lcx = p.x + p.w/2;
+        const lcy = p.y + p.h/2;
+        ctx.lineTo(lcx, lcy);
+        ctx.strokeStyle = isActive ? catColor : (isHover ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)');
+        ctx.lineWidth = isActive ? 2 : 1;
+        ctx.stroke();
+
+        // Pílula
+        roundedRect(ctx, p.x, p.y, p.w, p.h, 6);
+        ctx.fillStyle = isActive ? catColor : (isHover ? 'rgba(30,30,40,0.95)' : 'rgba(20,20,28,0.88)');
+        ctx.fill();
+        ctx.strokeStyle = isActive ? catColor : (isHover ? catColor : 'rgba(255,255,255,0.12)');
+        ctx.lineWidth = isActive ? 0 : 1;
+        ctx.stroke();
+
+        // Texto
+        ctx.fillStyle = isActive ? '#0E0E12' : (isHover ? catColor : '#EAEAF0');
+        ctx.font = isActive || isHover ? '700 11px Inter, sans-serif' : '600 11px Inter, sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.fillText(r.n, p.x + 7, p.y + p.h/2);
+
+        labelRects.push({x:p.x, y:p.y, w:p.w, h:p.h, idx:idx});
+      });
+
+      ctx.restore();
+    }
+  };
+
+  // ===== Painel de detalhe =====
+  function updateDetailPanel(idx){
+    const empty = document.getElementById('detailEmpty');
+    const content = document.getElementById('detailContent');
+    const panel = document.getElementById('riskDetail');
+    if(idx < 0){
+      content.classList.remove('show');
+      empty.style.display = 'flex';
+      panel.classList.remove('active');
+      panel.style.borderColor = '';
+      return;
+    }
+    const r = RISKS[idx];
+    const score = r.x * r.y;
+    const sev = severity(score);
+    empty.style.display = 'none';
+    content.classList.add('show');
+    panel.classList.add('active');
+    panel.style.borderColor = SEV_COLORS[sev];
+
+    const cat = document.getElementById('detailCat');
+    cat.textContent = CAT_LABEL[r.c];
+    cat.className = 'detail-cat-badge ' + r.c;
+
+    const sevPill = document.getElementById('detailSev');
+    sevPill.textContent = severityLabel(sev);
+    sevPill.className = 'detail-sev-pill ' + sev;
+
+    document.getElementById('detailName').textContent = r.n;
+    document.getElementById('detailProb').textContent = r.x;
+    document.getElementById('detailImp').textContent = r.y;
+    document.getElementById('detailScore').textContent = score;
+    document.getElementById('detailProbV').textContent = r.x;
+    document.getElementById('detailImpV').textContent = r.y;
+    setTimeout(() => {
+      document.getElementById('detailProbBar').style.width = (r.x/5*100) + '%';
+      document.getElementById('detailImpBar').style.width = (r.y/5*100) + '%';
+    }, 50);
+    document.getElementById('detailDesc').textContent = r.d;
+    document.getElementById('detailMit').innerHTML = ' ' + r.m;
+  }
+
+  // ===== Hit-testing nas labels =====
+  function getLabelAt(x, y){
+    for(const lr of labelRects){
+      if(x >= lr.x && x <= lr.x+lr.w && y >= lr.y && y <= lr.y+lr.h){
+        return lr.idx;
+      }
+    }
+    return -1;
+  }
+
+  // ===== Build chart =====
+  const matrixCtx = document.getElementById('riskMatrix');
+  const allPoints = PLOT_RISKS.map(r => ({x:r.xPlot, y:r.yPlot, name:r.n, cat:r.c, origX:r.x, origY:r.y}));
+
+  const chart = new Chart(matrixCtx, {
+    type:'scatter',
+    data:{
+      datasets:[{
+        label:'Riscos',
+        data:allPoints,
+        backgroundColor:(ctx) => CAT_COLORS[ctx.raw.cat] || '#FFC72C',
+        borderColor:'rgba(20,20,28,0.95)',
+        borderWidth:2.5,
+        pointRadius:(ctx) => ctx.dataIndex === activeIdx ? 11 : (ctx.dataIndex === hoverIdx ? 11 : 8),
+        pointHoverRadius:11
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      onHover:(event, elements) => {
+        const canvas = event.native?.target || event.chart.canvas;
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.native?.clientX || 0) - rect.left;
+        const y = (event.native?.clientY || 0) - rect.top;
+        let newHover = -1;
+        if(elements.length > 0){
+          newHover = elements[0].index;
+        } else {
+          newHover = getLabelAt(x, y);
+        }
+        const wrap = canvas.parentElement;
+        if(newHover >= 0) wrap.classList.add('has-pointer'); else wrap.classList.remove('has-pointer');
+        if(newHover !== hoverIdx){
+          hoverIdx = newHover;
+          chart.update('none');
+        }
+      },
+      onClick:(event, elements) => {
+        const canvas = event.native?.target || event.chart.canvas;
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.native?.clientX || 0) - rect.left;
+        const y = (event.native?.clientY || 0) - rect.top;
+        let target = -1;
+        if(elements.length > 0) target = elements[0].index;
+        else target = getLabelAt(x, y);
+        if(target >= 0){
+          activeIdx = activeIdx === target ? -1 : target;
+          updateDetailPanel(activeIdx);
+          chart.update('none');
+        }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            title:(items) => items[0].raw.name,
+            label:(ctx) => {
+              const score = ctx.raw.origX * ctx.raw.origY;
+              const sev = severity(score);
+              return [
+                'Prob.: ' + ctx.raw.origX + ' / 5',
+                'Impacto: ' + ctx.raw.origY + ' / 5',
+                'Score: ' + score + ' / 25 (' + severityLabel(sev) + ')',
+                'Categoria: ' + CAT_LABEL[ctx.raw.cat]
+              ];
+            }
+          },
+          backgroundColor:'rgba(14,14,18,0.96)',
+          titleColor:'#FFC72C',
+          bodyColor:'#EAEAF0',
+          borderColor:'rgba(255,199,44,0.3)',
+          borderWidth:1, padding:12, cornerRadius:8,
+          displayColors:false
+        },
+        title:{
+          display:true,
+          text:'Matriz de Risco · Probabilidade × Impacto',
+          color:'#EAEAF0',
+          font:{size:14,weight:'600'},
+          padding:{bottom:14}
+        }
+      },
+      scales:{
+        x:{
+          min:0.5, max:5.5,
+          title:{display:true,text:'Probabilidade  →',color:'#EAEAF0',font:{size:12,weight:'600'},padding:{top:8}},
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{stepSize:1,color:'#9A9AA8',font:{weight:'600'}}
+        },
+        y:{
+          min:0.5, max:5.5,
+          title:{display:true,text:'Impacto  →',color:'#EAEAF0',font:{size:12,weight:'600'},padding:{bottom:8}},
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{stepSize:1,color:'#9A9AA8',font:{weight:'600'}}
+        }
+      },
+      animation:{duration:1400,easing:'easeOutQuart'}
+    },
+    plugins:[heatmapPlugin, glowPlugin, labelsPlugin]
+  });
+
+  // Pré-selecciona o primeiro risco crítico para o painel não nascer vazio
+  // Apenas após o chart renderizar
+  setTimeout(() => {
+    activeIdx = 0; // Chick-fil-A
+    updateDetailPanel(activeIdx);
+    chart.update('none');
+  }, 800);
+</script>
+
+</body>
+</html>
